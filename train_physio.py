@@ -4,7 +4,7 @@ import os
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
-from pytorch_lightning.metrics.functional import accuracy, auroc
+from torchmetrics.functional import accuracy, auroc
 from torch_cfc import Cfc
 from pytorch_lightning.callbacks import ModelCheckpoint
 import torch.nn.functional
@@ -177,7 +177,6 @@ def eval(hparams, speed=False):
     return float(results["val_rocauc"])
 
 
-
 # AUC: 83.90 % +-0.22
 BEST_DEFAULT = {
     "epochs": 57,
@@ -295,8 +294,6 @@ def score(config, n=5):
     for i in range(n):
         means.append(eval(config, speed=True))
     print(f"Test AUC: {np.mean(means):0.4f} $\\pm$ {np.std(means):0.4f} ")
-
-
 
 
 if __name__ == "__main__":
