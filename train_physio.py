@@ -52,7 +52,7 @@ class PhysionetLearner(pl.LightningModule):
         y = y.view(-1)
         loss = self.loss_fn(y_hat, y)
         preds = torch.argmax(y_hat.detach(), dim=-1)
-        acc = accuracy(preds, y)
+        acc = accuracy(preds, y, "binary")  # TODO not sure
         self.log("train_acc", acc, prog_bar=True)
         self.log("train_loss", loss, prog_bar=True)
         return loss
@@ -73,7 +73,7 @@ class PhysionetLearner(pl.LightningModule):
         self.log("val_acc", acc, prog_bar=True)
         return [softmax, y]
 
-    def validation_epoch_end(self, validation_step_outputs):
+    def on_validation_epoch_end(self, validation_step_outputs):
         all_preds = torch.cat([l[0] for l in validation_step_outputs])
         all_labels = torch.cat([l[1] for l in validation_step_outputs])
 
@@ -120,7 +120,6 @@ class PhysionetLearner(pl.LightningModule):
         current_epoch,
         batch_nb,
         optimizer,
-        optimizer_idx,
         closure,
         on_tpu=False,
         using_native_amp=False,
@@ -166,7 +165,7 @@ def eval(hparams, speed=False):
     trainer = pl.Trainer(
         max_epochs=hparams["epochs"],
         gradient_clip_val=hparams["clipnorm"],
-        gpus=1,
+        devices=1,
         callbacks=[SpeedCallback()] if speed else None,
     )
     trainer.fit(
